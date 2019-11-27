@@ -21,7 +21,8 @@ defmodule Kgb.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:httpotion, "~> 3.1.0"}
+      {:httpotion, "~> 3.1.0"},
+      {:exvcr, "~> 0.11.0", only: :test}
     ]
   end
 end
