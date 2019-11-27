@@ -22,7 +22,8 @@ defmodule Kgb.MixProject do
   defp deps do
     [
       {:httpotion, "~> 3.1.0"},
-      {:exvcr, "~> 0.11.0", only: :test}
+      {:exvcr, "~> 0.11.0", only: :test},
+      {:floki, "~> 0.23.0"}
     ]
   end
 end
