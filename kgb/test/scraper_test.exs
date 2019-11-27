@@ -103,7 +103,7 @@ defmodule ScraperTest do
 
   describe "rating_from_class/1" do
     test "correctly gets maximum rating" do
-      Kgb.Scraper.rating_from_class("foo bar baz bang rating-50 bamph quux ") == 50
+      assert Kgb.Scraper.rating_from_class("foo bar baz bang rating-50 bamph quux ") == 50
     end
     
   end
