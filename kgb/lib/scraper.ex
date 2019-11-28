@@ -171,19 +171,8 @@ defmodule Kgb.Scraper do
     |> Floki.find(".review-employee")
     |> length
   end
-    
-  @doc """
-  Initiate a request to the dealership page, and parse the data into a list 
-  of Review structs
 
-  Parameters:
-    The URI to scrape
-
-  Returns:
-    A list of review structs
-  """
-  def scrape_reviews!(uri) do
-    reviews = Kgb.Scraper.fetch!(uri) |> Kgb.Scraper.reviews
+  def init_structs(reviews) do
     Enum.map(reviews, fn(rev) ->
       %Review
       {
@@ -194,6 +183,25 @@ defmodule Kgb.Scraper do
         employees: Kgb.Scraper.employee_count(rev),
         avg_stars: Kgb.Scraper.avg_stars(rev)
       }
+    end)
+  end
+  
+  @doc """
+  Initiate a request to the dealership page, and parse the data into a list 
+  of Review structs
+
+  Parameters:
+    uri: The URI to scrape
+    pages: the number of pages
+
+  Returns:
+    A list of review structs
+  """
+  def scrape_reviews!(uri, pages \\ 1) do
+    range   = 1..pages
+    Enum.flat_map(range, fn(n) ->
+      reviews = Kgb.Scraper.fetch!(uri, n) |> Kgb.Scraper.reviews
+      Kgb.Scraper.init_structs(reviews)
     end)
   end
 end
