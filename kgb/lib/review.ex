@@ -11,7 +11,7 @@ defmodule Kgb.Review do
   end
 
   def custom_titled_reviews(review_list) do
-    Enum.filter(review_list, fn(rev) -> Kgb.Review.custom_title?(rev) end, &>=/2)
+    Enum.filter(review_list, fn(rev) -> Kgb.Review.custom_title?(rev) end)
   end
 
   def order_by_review_len(review_list) do
