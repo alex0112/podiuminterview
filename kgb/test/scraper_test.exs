@@ -11,16 +11,24 @@ defmodule ScraperTest do
   
   @remote_uri "https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
   
-  describe "fetch!/1" do
+  describe "fetch!/2" do
     test "returns 200 OK" do
       use_cassette "successful_request" do
         assert Kgb.Scraper.fetch!(@remote_uri).status_code == 200
       end
     end
+
+    test "gets the second page of results when requested" do
+      use_cassette "second_page" do
+        resp    = Kgb.Scraper.fetch!(@remote_uri, 2).body
+        fl      = Floki.parse resp
+        page_no = fl |> Floki.find(".page_inactive.page_current.page") |> Floki.text
+        assert page_no == "2"
+      end
+    end
   end
 
   describe "reviews/1" do
-
     test "gets a list of reviews from a response" do
       ## Tests that each div returned contains one ".helpful-button" button.
       ## Only review divs contain "helpful" buttons.

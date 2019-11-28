@@ -14,12 +14,19 @@ defmodule Kgb.Scraper do
 
   Parameters:
     uri: The URI to scrape
+    page_no: The page number of review results to display (defaults to first)
 
   Returns:
     An HTTPotion Response
   """
-  def fetch!(uri) do
-    HTTPotion.get(uri)
+  def fetch!(uri, page_no \\ 1) do
+    cond do
+      page_no == 1 ->
+        HTTPotion.get(uri)
+      page_no > 1 ->  
+        uri = uri <> "page#{page_no}"
+        HTTPotion.get(uri)
+      end
   end
 
   @doc """
@@ -48,10 +55,10 @@ defmodule Kgb.Scraper do
   def name(review) do
     review
     |> Floki.find(".italic.font-18.black.notranslate") ## Find the div containing the name
-    |> Floki.text ## Get the text of the name
-    |> String.replace("- ", "") ## Remove the hyphen/whitespace, and return
+    |> Floki.text                                      ## Get the text of the name
+    |> String.replace("- ", "")                        ## Remove the hyphen/whitespace, and return
   end
-
+  
   @doc """
   Parse the date out of a review
 
@@ -64,7 +71,7 @@ defmodule Kgb.Scraper do
   def date(review) do
     review
     |> Floki.find(".italic.col-xs-6.col-sm-12.pad-none.margin-none.font-20") ## Find the div containing the review text
-    |> Floki.text ## return the content
+    |> Floki.text
   end
 
   @doc """
@@ -110,10 +117,10 @@ defmodule Kgb.Scraper do
   def star_rating(html) do
     [ classname | _ ] =
       html
-      |> Floki.find(".rating-static")
-      |> Floki.attribute("class")
+      |> Floki.find(".rating-static") ## Find divs containing the rating-static class
+      |> Floki.attribute("class")     ## Get a string of all classes associated with that div
     
-    Kgb.Scraper.rating_from_class(classname)
+    Kgb.Scraper.rating_from_class(classname)  ## Ascertain the star rating from the classnames
   end
 
   @doc """
@@ -126,7 +133,7 @@ defmodule Kgb.Scraper do
     An integer rating between 0 and 50
   """
   def rating_from_class(class) do
-    [ matched_class | _ ] = Regex.run(~r/rating-[0-9]{1,2}/, class)
+    [ matched_class | _ ] = Regex.run(~r/rating-[0-9]{1,2}/, class) ## Ratings come as a classname on the div, in the form `.rating-NN` 
     rating                = String.split(matched_class, "-") |> List.last
     {int, _}              = Integer.parse(rating)
     
@@ -146,11 +153,25 @@ defmodule Kgb.Scraper do
     review
     |> Floki.find("h3.no-format.inline.italic-bolder.font-20.dark-grey")
     |> Floki.text
-    |> String.replace("\"", "")
+    |> String.replace("\"", "") ## Replace double quotes in the review title
     |> String.trim
-
   end
-  
+
+  @doc """
+  Count the number of employees the customer interacted with
+
+  Parameters:
+    review: The Floki html tree of the review
+
+  Returns:
+    An integer count of employees associated with the review
+  """
+  def employee_count(review) do
+    review
+    |> Floki.find(".review-employee")
+    |> length
+  end
+    
   @doc """
   Initiate a request to the dealership page, and parse the data into a list 
   of Review structs
@@ -170,6 +191,7 @@ defmodule Kgb.Scraper do
         date:      Kgb.Scraper.date(rev),
         title:     Kgb.Scraper.title(rev),
         text:      Kgb.Scraper.text(rev),
+        employees: Kgb.Scraper.employee_count(rev),
         avg_stars: Kgb.Scraper.avg_stars(rev)
       }
     end)

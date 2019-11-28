@@ -31,13 +31,13 @@ defmodule ReviewTest do
 
   describe "custom_title?/1" do
     test "returns true for a custom title" do
-      cust_title_rev = %Kgb.Review{name: "", date: "", title: "asdf", text: "foobar baz bang bamph quux", avg_stars: 50}
+      cust_title_rev = %Kgb.Review{name: "", date: "", title: "asdf", text: "foobar baz bang bamph quux", employees: 1, avg_stars: 50}
 
       assert Kgb.Review.custom_title?(cust_title_rev)
     end
 
     test "returns false for a derived title" do
-      derived_title_rev = %Kgb.Review{name: "", date: "", title: "", text: "foobar baz bang bamph quux", avg_stars: 50}
+      derived_title_rev = %Kgb.Review{name: "", date: "", title: "", text: "foobar baz bang bamph quux", employees: 1, avg_stars: 50}
       refute Kgb.Review.custom_title?(derived_title_rev)
     end
   end
