@@ -1,13 +1,13 @@
 defmodule Kgb.Review do
-  @enforce_keys [:name, :date, :text, :avg_stars]
-  defstruct [:name, :date, :text, :avg_stars]
+  @enforce_keys [:name, :date, :title, :text, :avg_stars]
+  defstruct [:name, :date, :title, :text, :avg_stars]
 
   def perfect_ratings(review_list) do
     Enum.filter(review_list, fn(rev) -> rev.avg_stars == 50 end)
   end
 
   def custom_title?(review) do
-    review.title =~ review.text
+    not (review.text =~ review.title)
   end
 
   def custom_titled_reviews(review_list) do
@@ -17,9 +17,6 @@ defmodule Kgb.Review do
   def order_by_review_len(review_list) do
     Enum.sort_by(review_list, fn(rev) -> String.length(rev.text) end)
   end
-
-  
-  
   
 end
 

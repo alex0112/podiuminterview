@@ -168,6 +168,7 @@ defmodule Kgb.Scraper do
       {
         name:      Kgb.Scraper.name(rev),
         date:      Kgb.Scraper.date(rev),
+        title:     Kgb.Scraper.title(rev),
         text:      Kgb.Scraper.text(rev),
         avg_stars: Kgb.Scraper.avg_stars(rev)
       }

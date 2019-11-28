@@ -111,19 +111,13 @@ defmodule ScraperTest do
 
 
   describe "title/1" do
-    test "" do
+    test "gets the correct title from the first review" do
       use_cassette "successful_request" do
         resp   = Kgb.Scraper.fetch!(@remote_uri)
         review = Kgb.Scraper.reviews(resp) |> List.first
 
         assert(Kgb.Scraper.title(review) == "Quick and easy transaction")
-        
       end
     end
-
-
   end
-  
-
-
 end
