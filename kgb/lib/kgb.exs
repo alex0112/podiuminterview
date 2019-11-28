@@ -2,7 +2,6 @@ defmodule Kgb do
   @moduledoc """
   Print the top most positive reviews
   """
-
   require Kgb.Review
   require Kgb.Scraper
 
@@ -23,9 +22,7 @@ defmodule Kgb do
       Ratings: #{rev.avg_stars}
       """
     end)
-    
   end
-  
 end
 
 IO.puts "Fetching data"

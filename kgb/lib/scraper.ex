@@ -1,5 +1,4 @@
 defmodule Kgb.Scraper do
-  import Kgb.Review
   alias Kgb.Review, as: Review
   
   require HTTPotion
