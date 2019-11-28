@@ -1,15 +1,16 @@
 defmodule Kgb.Scraper do
+  import Kgb.Review
+  alias Kgb.Review, as: Review
+  
   require HTTPotion
   require Floki
   
  @moduledoc """
- The Scraper module collects the raw HTML of each review, and extracts the name, date, text, and stars from the review.
+ The Scraper module collects the raw HTML of each review, and extracts the name, date, text, and stars.
  """
-  @enforce_keys [:uri]
-  defstruct [:uri, only_positives: true]
 
   @doc """
-  Scrape the relevant information from the specified URI
+  Make a request for the relevant information from the specified URI
 
   Parameters:
     uri: The URI to scrape
@@ -17,7 +18,7 @@ defmodule Kgb.Scraper do
   Returns:
     An HTTPotion Response
   """
-  def scrape!(uri) do
+  def fetch!(uri) do
     HTTPotion.get(uri)
   end
 
@@ -70,7 +71,7 @@ defmodule Kgb.Scraper do
   Parse the text out of a review
 
   Parameters:
-     review_html: The Floki html tree of the review
+     review: The Floki html tree of the review
 
   Returns:
      The text of the review (string)
@@ -86,13 +87,15 @@ defmodule Kgb.Scraper do
   Parse the star rating of a review
 
   Parameters:
-     review: The html of the review
+    review: The Floki html tree of the review
 
   Returns:
     An integer rating of the dealership
   """
   def avg_stars(review) do
-    
+    review
+    |> Floki.find(".rating-static")
+    |> Kgb.Scraper.star_rating
   end
 
   @doc """
@@ -102,7 +105,7 @@ defmodule Kgb.Scraper do
     html: A floki html tree
 
   Returns:
-    An integer between 10 and 50
+    An integer between 0 and 50
   """
   def star_rating(html) do
     [ classname | _ ] =
@@ -113,12 +116,61 @@ defmodule Kgb.Scraper do
     Kgb.Scraper.rating_from_class(classname)
   end
 
+  @doc """
+  Given a string of css class names, parse out the star rating number
+
+  Parameters:
+    A string containing one or more class names
+
+  Returns:
+    An integer rating between 0 and 50
+  """
   def rating_from_class(class) do
     [ matched_class | _ ] = Regex.run(~r/rating-[0-9]{1,2}/, class)
     rating                = String.split(matched_class, "-") |> List.last
-    int                   = Integer.parse(rating) |> elem(0)
+    {int, _}              = Integer.parse(rating)
     
     int
   end
 
+  @doc """
+  Get the title of a review
+
+  Params:
+    review: The Floki html tree of the review
+
+  Returns:
+    The title text of the review
+  """
+  def title(review) do
+    review
+    |> Floki.find("h3.no-format.inline.italic-bolder.font-20.dark-grey")
+    |> Floki.text
+    |> String.replace("\"", "")
+    |> String.trim
+
+  end
+  
+  @doc """
+  Initiate a request to the dealership page, and parse the data into a list 
+  of Review structs
+
+  Parameters:
+    The URI to scrape
+
+  Returns:
+    A list of review structs
+  """
+  def scrape_reviews!(uri) do
+    reviews = Kgb.Scraper.fetch!(uri) |> Kgb.Scraper.reviews
+    Enum.map(reviews, fn(rev) ->
+      %Review
+      {
+        name:      Kgb.Scraper.name(rev),
+        date:      Kgb.Scraper.date(rev),
+        text:      Kgb.Scraper.text(rev),
+        avg_stars: Kgb.Scraper.avg_stars(rev)
+      }
+    end)
+  end
 end
