@@ -40,8 +40,6 @@ defmodule ReviewTest do
       derived_title_rev = %Kgb.Review{name: "", date: "", title: "", text: "foobar baz bang bamph quux", avg_stars: 50}
       refute Kgb.Review.custom_title?(derived_title_rev)
     end
-        
   end
-  
   
 end
